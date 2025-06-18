@@ -1,0 +1,58 @@
+import heapq
+from collections import defaultdict
+
+class median:
+    def __init__(self):
+        self.minh = []
+        self.maxh = []
+        self.delay = defaultdict(int)
+
+    def add(self,n):
+        if not self.maxh or n <= -self.maxh[0]:
+            heapq.heappush(self.maxh, -n)
+        else:
+            heapq.heappush(self.maxh, n)
+        self.rebal()
+        
+    def remove(self, n):
+        self.delay[n] += 1
+        if n <= -self.maxh[0]:
+            self.balh(self.maxh)
+        else:
+            self.balh(self.minh)
+        self.rebal()
+    
+    def balh(self,h):
+        while h and self.delay[abs(h[0]) if h == self.maxh else h[0]]:
+            n = -heapq.heappop(h) if h == self.maxh else heapq.heappop(h)
+            self.delay[n] -= 1
+
+    def rebal(self):
+        if len(self.maxh) > len(self.minh)+1:
+            heapq.heappush(self.minh, -heapq.heappop(self.maxh))
+        elif len(self.minh) > len(self.maxh):
+            heapq.heappush(self.maxh, -heapq.heappop(self.minh))
+        self.balh(self.maxh)
+        self.balh(self.minh)
+
+    def getmedian(self, k):
+        if k % 2 == 1:
+            return int(-self.maxh[0])
+        else:
+            return (-self.maxh[0] + self.minh[0]) / 2.0
+        
+def swmedian(nums,k):
+    x = median()
+    r = []
+    for i in range(len(nums)):
+        x.add(nums[i])
+        if i >= k:
+            x.remove(nums[i-k])
+        if i >= k-1:
+            r.append(x.getmedian(k))
+    return r
+            
+# [1,-1,-1,3,5,6]
+nums = [1,3,-1,-3,5,3,6,7]
+k = 3 
+print(swmedian(nums,k))
